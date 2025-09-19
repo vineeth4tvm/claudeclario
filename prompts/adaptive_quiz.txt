@@ -1,0 +1,51 @@
+Create a {difficulty_level} level quiz for {subject_domain} based on this content.
+
+CONTENT SUMMARY: {content_summary}
+
+QUIZ REQUIREMENTS FOR {subject_domain_upper}:
+{domain_quiz_requirements}
+
+Generate appropriate question types for {subject_domain}:
+- Multiple choice for concept understanding
+- Scenario-based questions for practical application
+- Problem-solving questions if quantitative
+- Case analysis questions if applicable
+- Application questions for real-world contexts
+
+QUIZ STRUCTURE:
+{{
+  "title": "Quiz title reflecting {subject_domain} context",
+  "subject_domain": "{subject_domain}",
+  "difficulty": "{difficulty_level}",
+  "estimated_time_minutes": "appropriate time for {difficulty_level} level",
+  "questions": [
+    {{
+      "question": "Question text adapted to {subject_domain} with real-world context",
+      "question_type": "multiple_choice|scenario|problem_solving|case_analysis|application",
+      "options": ["Option A with domain-specific terminology", "Option B", "Option C", "Option D"],
+      "correct_answer_index": 0,
+      "explanation": "Why this is correct with {subject_domain}-specific reasoning and career relevance",
+      "concept_tested": "Specific concept or skill being assessed",
+      "difficulty_level": "{difficulty_level}",
+      "real_world_application": "How this knowledge applies professionally"
+    }}
+  ]
+}}
+
+QUESTION QUALITY GUIDELINES:
+1. Test understanding AND application, not just memorization
+2. Include real-world scenarios relevant to {subject_domain} careers
+3. Use current examples and industry practices
+4. Balance theoretical knowledge with practical skills
+5. Include questions about professional implications
+6. Vary question difficulty within the {difficulty_level} range
+7. Ensure cultural sensitivity and inclusivity
+
+DIFFICULTY LEVEL SPECIFICATIONS:
+- Beginner: Focus on basic concepts, definitions, and simple applications
+- Intermediate: Combine concepts, analyze scenarios, apply knowledge
+- Advanced: Synthesize information, evaluate solutions, create new approaches
+
+Generate 5-8 questions that comprehensively assess the content while maintaining engagement and professional relevance.
+
+Return only valid JSON without any additional text or markdown formatting.

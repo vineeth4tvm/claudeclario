@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ chapter.title }} - Economics Study App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .content-block {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+            background-color: #f8f9fa;
+        }
+
+        .concept-explanation {
+            border-left-color: #28a745;
+        }
+
+        .interactive-chart {
+            border-left-color: #fd7e14;
+            background: linear-gradient(135deg, #fff8f3 0%, #fff 100%);
+        }
+
+        .case-study {
+            border-left-color: #6f42c1;
+            background: linear-gradient(135deg, #f8f6ff 0%, #fff 100%);
+        }
+
+        .quick-calculation {
+            border-left-color: #dc3545;
+            background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+        }
+
+        .bookmark-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #6c757d;
+            cursor: pointer;
+        }
+
+        .bookmark-btn.bookmarked {
+            color: #ffc107;
+        }
+
+        .difficulty-badge {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .real-world-example {
+            background-color: #e8f4f8;
+            border-left: 3px solid #17a2b8;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .career-tip {
+            background-color: #f0f8e8;
+            border-left: 3px solid #28a745;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 1.5rem 0;
+        }
+
+        .simplify-controls {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .progress-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: #e9ecef;
+            z-index: 1000;
+        }
+
+        .progress-bar-reading {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #28a745);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-indicator">
+        <div class="progress-bar-reading" id="readingProgress"></div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-graduation-cap"></i> Economics Study App
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('view_bookmarks') }}">
+                    <i class="fas fa-bookmark"></i> Bookmarks
+                </a>
+                <a class="nav-link" href="{{ url_for('view_progress') }}">
+                    <i class="fas fa-chart-line"></i> Progress
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Chapter Header -->
+        <div class="row mb-4">
+            <div class="col">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ url_for('view_subject', subject_id=subject.id) }}">
+                                {{ subject.name }}
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item active">{{ chapter.title }}</li>
+                    </ol>
+                </nav>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="display-5">{{ chapter.title }}</h1>
+                        <div class="mb-3">
+                            <span class="badge bg-info difficulty-badge">
+                                {{ chapter.difficulty_level.title() }} Level
+                            </span>
+                            <span class="badge bg-secondary ms-2">
+                                <i class="fas fa-clock"></i> {{ chapter.estimated_read_time }} min read
+                            </span>
+                            <span class="badge bg-primary ms-2">
+                                <i class="fas fa-chart-bar"></i> {{ chapter.charts_count }} interactive charts
+                            </span>
+                        </div>
+                    </div>
+                    <button class="btn btn-success" onclick="markChapterComplete()">
+                        <i class="fas fa-check"></i> Mark Complete
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chapter Introduction -->
+        {% if chapter.intro_summary %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-lightbulb"></i> Chapter Overview</h5>
+                {% set intro_data = chapter.intro_summary | from_json %}
+                <p class="card-text">{{ intro_data.simplified_explanation }}</p>
+
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-key"></i> Key Concepts</h6>
+                        <ul class="list-unstyled">
+                            {% for concept in intro_data.main_concepts %}
+                            <li><i class="fas fa-dot-circle text-primary"></i> {{ concept }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="career-tip">
+                            <h6><i class="fas fa-briefcase"></i> Why This Matters</h6>
+                            <p class="mb-0">{{ intro_data.why_it_matters }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Content Blocks -->
+        {% for block in content_blocks %}
+        <div class="content-block {{ block.type }}" id="block-{{ loop.index0 }}" data-block-index="{{ loop.index0 }}">
+            <div class="position-relative">
+                <button class="bookmark-btn {% if loop.index0 in bookmark_indices %}bookmarked{% endif %}"
+                        onclick="toggleBookmark({{ chapter.id }}, {{ loop.index0 }}, '{{ block.title }}')"
+                        title="Bookmark this section">
+                    <i class="fas fa-bookmark"></i>
+                </button>
+
+                {% if block.type == 'concept_explanation' %}
+                <div class="concept-explanation-content">
+                    <h4><i class="fas fa-brain"></i> {{ block.title }}</h4>
+                    <div class="mb-3">
+                        <span class="badge bg-success difficulty-badge">{{ block.difficulty_level.title() }}</span>
+                    </div>
+
+                    <div class="simplified-content">
+                        <p>{{ block.simplified_content }}</p>
+                    </div>
+
+                    {% if block.examples %}
+                    <h6><i class="fas fa-examples"></i> Real-World Examples</h6>
+                    {% for example in block.examples %}
+                    <div class="real-world-example">
+                        <p><strong>Example {{ loop.index }}:</strong> {{ example }}</p>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if block.career_application %}
+                    <div class="career-tip">
+                        <h6><i class="fas fa-user-tie"></i> Career Application</h6>
+                        <p>{{ block.career_application }}</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="simplify-controls">
+                        <label for="difficulty-{{ loop.index0 }}" class="form-label">Adjust Difficulty:</label>
+                        <select class="form-select form-select-sm d-inline-block w-auto"
+                                id="difficulty-{{ loop.index0 }}"
+                                onchange="simplifyConcept({{ loop.index0 }}, this.value)">
+                            <option value="beginner" {% if block.difficulty_level == 'beginner' %}selected{% endif %}>Beginner</option>
+                            <option value="intermediate" {% if block.difficulty_level == 'intermediate' %}selected{% endif %}>Intermediate</option>
+                            <option value="advanced" {% if block.difficulty_level == 'advanced' %}selected{% endif %}>Advanced</option>
+                        </select>
+                        <button class="btn btn-outline-primary btn-sm ms-2" onclick="generateMoreExamples({{ loop.index0 }})">
+                            <i class="fas fa-plus"></i> More Examples
+                        </button>
+                    </div>
+                </div>
+
+                {% elif block.type == 'interactive_chart' %}
+                <div class="interactive-chart-content">
+                    <h4><i class="fas fa-chart-line"></i> {{ block.title }}</h4>
+                    <p class="text-muted">{{ block.description }}</p>
+
+                    <div class="chart-container">
+                        <canvas id="chart-{{ loop.index0 }}"></canvas>
+                    </div>
+
+                    <div class="mt-3">
+                        <h6><i class="fas fa-lightbulb"></i> What This Shows</h6>
+                        <p>{{ block.interpretation }}</p>
+
+                        <div class="alert alert-info">
+                            <strong><i class="fas fa-graduation-cap"></i> Economic Insight:</strong>
+                            {{ block.economic_concept }}
+                        </div>
+                    </div>
+
+                    <script>
+                    // Generate Chart.js chart for this block
+                    (function() {
+                        const ctx = document.getElementById('chart-{{ loop.index0 }}').getContext('2d');
+
+                        // Sample data - in real implementation, this would come from the AI-generated chart config
+                        const chartConfig = {
+                            type: '{{ block.chart_type }}',
+                            data: {{ block.sample_data | tojson | safe }},
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: '{{ block.title }}'
+                                    },
+                                    legend: {
+                                        display: true,
+                                        position: 'top'
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Value'
+                                        }
+                                    },
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Category'
+                                        }
+                                    }
+                                }
+                            }
+                        };
+
+                        new Chart(ctx, chartConfig);
+                    })();
+                    </script>
+                </div>
+
+                {% elif block.type == 'case_study' %}
+                <div class="case-study-content">
+                    <h4><i class="fas fa-building"></i> {{ block.title }}</h4>
+
+                    <div class="alert alert-light border-start border-info border-4">
+                        <h6><i class="fas fa-scenario"></i> Scenario</h6>
+                        <p>{{ block.scenario }}</p>
+                    </div>
+
+                    <h6><i class="fas fa-cogs"></i> Economic Principles at Work</h6>
+                    <ul class="list-group list-group-flush mb-3">
+                        {% for principle in block.economic_principles %}
+                        <li class="list-group-item">
+                            <i class="fas fa-arrow-right text-primary"></i> {{ principle }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                    <h6><i class="fas fa-search"></i> Analysis</h6>
+                    <p>{{ block.analysis }}</p>
+
+                    <div class="career-tip">
+                        <h6><i class="fas fa-star"></i> Key Lessons</h6>
+                        <p>{{ block.lessons }}</p>
+                    </div>
+                </div>
+
+                {% elif block.type == 'quick_calculation' %}
+                <div class="quick-calculation-content">
+                    <h4><i class="fas fa-calculator"></i> {{ block.title }}</h4>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-formula"></i> Formula</h6>
+                            <div class="bg-light p-3 rounded font-monospace">
+                                {{ block.formula }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-example"></i> Example Calculation</h6>
+                            <div class="bg-light p-3 rounded">
+                                <pre>{{ block.example_calculation }}</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <h6><i class="fas fa-info-circle"></i> When to Use This</h6>
+                        <p>{{ block.when_to_use }}</p>
+                    </div>
+
+                    <!-- Interactive Calculator -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-calculator"></i> Try It Yourself</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Input 1:</label>
+                                    <input type="number" class="form-control calculator-input"
+                                           data-calc-id="{{ loop.index0 }}" data-input="1" placeholder="Enter value">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Input 2:</label>
+                                    <input type="number" class="form-control calculator-input"
+                                           data-calc-id="{{ loop.index0 }}" data-input="2" placeholder="Enter value">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Result:</label>
+                                    <input type="text" class="form-control" id="calc-result-{{ loop.index0 }}" readonly>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary mt-2" onclick="calculateResult({{ loop.index0 }})">
+                                <i class="fas fa-calculate"></i> Calculate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Q&A Section -->
+        <div class="card mt-5">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-question-circle"></i> Ask a Question</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('ask_question', chapter_id=chapter.id) }}">
+                    <div class="mb-3">
+                        <textarea class="form-control" name="question" rows="3"
+                                  placeholder="Ask anything about this chapter's concepts, applications, or career relevance..."
+                                  required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Ask Question
+                    </button>
+                </form>
+
+                {% if session.get('last_question') and session.get('qna_chapter_id') == chapter.id %}
+                <hr>
+                <div class="alert alert-light">
+                    <h6><i class="fas fa-question"></i> Your Question:</h6>
+                    <p><em>{{ session.last_question }}</em></p>
+
+                    <h6><i class="fas fa-robot"></i> AI Answer:</h6>
+                    <div class="answer-content">{{ session.last_answer }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <a href="{{ url_for('generate_quiz', chapter_id=chapter.id) }}" class="btn btn-success btn-lg w-100">
+                    <i class="fas fa-brain"></i> Take Practice Quiz
+                </a>
+            </div>
+            <div class="col-md-6">
+                <button class="btn btn-info btn-lg w-100" onclick="generateStudyNotes()">
+                    <i class="fas fa-file-alt"></i> Generate Study Notes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        // Reading progress indicator
+        function updateReadingProgress() {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('readingProgress').style.width = scrolled + '%';
+        }
+
+        window.addEventListener('scroll', updateReadingProgress);
+
+        // Bookmark functionality
+        async function toggleBookmark(chapterId, blockIndex, title) {
+            const btn = document.querySelector(`[onclick="toggleBookmark(${chapterId}, ${blockIndex}, '${title}')"]`);
+            const isBookmarked = btn.classList.contains('bookmarked');
+
+            try {
+                if (isBookmarked) {
+                    // Remove bookmark - would need bookmark ID in real implementation
+                    const response = await fetch('/bookmark/remove/1', { method: 'DELETE' });
+                    if (response.ok) {
+                        btn.classList.remove('bookmarked');
+                        showToast('Bookmark removed', 'info');
+                    }
+                } else {
+                    // Add bookmark
+                    const response = await fetch('/api/bookmark/add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chapter_id: chapterId,
+                            content_block_index: blockIndex,
+                            title: title,
+                            type: 'concept'
+                        })
+                    });
+
+                    if (response.ok) {
+                        btn.classList.add('bookmarked');
+                        showToast('Bookmark added', 'success');
+                    }
+                }
+            } catch (error) {
+                showToast('Error managing bookmark', 'danger');
+            }
+        }
+
+        // Concept simplification
+        async function simplifyConcept(blockIndex, difficulty) {
+            const block = document.querySelector(`#block-${blockIndex} .simplified-content`);
+            const originalText = block.textContent;
+
+            try {
+                const response = await fetch('/api/simplify-concept', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        concept_text: originalText,
+                        difficulty_level: difficulty
+                    })
+                });
+
+                const data = await response.json();
+                if (data.simplified_text) {
+                    block.innerHTML = `<p>${data.simplified_text}</p>`;
+                    showToast(`Content adjusted to ${difficulty} level`, 'success');
+                }
+            } catch (error) {
+                showToast('Error simplifying content', 'danger');
+            }
+        }
+
+        // Generate more examples
+        async function generateMoreExamples(blockIndex) {
+            const block = document.querySelector(`#block-${blockIndex}`);
+            const conceptText = block.querySelector('.simplified-content').textContent;
+
+            // This would call the AI service to generate more examples
+            showToast('Generating more examples...', 'info');
+
+            // Placeholder - in real implementation, this would be an API call
+            setTimeout(() => {
+                const exampleDiv = document.createElement('div');
+                exampleDiv.className = 'real-world-example mt-2';
+                exampleDiv.innerHTML = '<p><strong>Additional Example:</strong> Here\'s another practical application of this concept...</p>';
+                block.querySelector('.concept-explanation-content').appendChild(exampleDiv);
+                showToast('New example added!', 'success');
+            }, 1000);
+        }
+
+        // Calculator functionality
+        function calculateResult(calcId) {
+            const input1 = document.querySelector(`[data-calc-id="${calcId}"][data-input="1"]`).value;
+            const input2 = document.querySelector(`[data-calc-id="${calcId}"][data-input="2"]`).value;
+            const resultField = document.getElementById(`calc-result-${calcId}`);
+
+            if (input1 && input2) {
+                // Simple calculation - in real app, this would use the specific formula
+                const result = parseFloat(input1) + parseFloat(input2);
+                resultField.value = result.toFixed(2);
+            } else {
+                showToast('Please enter both values', 'warning');
+            }
+        }
+
+        // Mark chapter complete
+        async function markChapterComplete() {
+            try {
+                const response = await fetch(`/mark-chapter-complete/{{ chapter.id }}`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    showToast('Chapter marked as completed!', 'success');
+                    // Update UI to show completion status
+                    const btn = document.querySelector('button[onclick="markChapterComplete()"]');
+                    btn.innerHTML = '<i class="fas fa-check"></i> Completed';
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-secondary');
+                    btn.disabled = true;
+                }
+            } catch (error) {
+                showToast('Error marking chapter complete', 'danger');
+            }
+        }
+
+        // Generate study notes
+        async function generateStudyNotes() {
+            showToast('Generating personalized study notes...', 'info');
+
+            // This would compile key concepts, bookmarks, and Q&A into study notes
+            setTimeout(() => {
+                // Placeholder - would generate and download PDF or open in new window
+                showToast('Study notes generated! Check your downloads.', 'success');
+            }, 2000);
+        }
+
+        // Toast notification system
+        function showToast(message, type = 'info') {
+            // Create toast if it doesn't exist
+            if (!document.getElementById('toast-container')) {
+                const container = document.createElement('div');
+                container.id = 'toast-container';
+                container.className = 'position-fixed top-0 end-0 p-3';
+                container.style.zIndex = '1050';
+                document.body.appendChild(container);
+            }
+
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type}`;
+            toast.role = 'alert';
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+
+            document.getElementById('toast-container').appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+
+            // Remove toast element after it's hidden
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.remove();
+            });
+        }
+
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+</body>
+</html>

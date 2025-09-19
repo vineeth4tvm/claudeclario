@@ -1,0 +1,547 @@
+{% extends "base.html" %}
+
+{% block title %}Upload PDF - {{ course.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('view_course', course_id=course.id) }}">{{ course.name }}</a></li>
+                    <li class="breadcrumb-item active">Upload PDF</li>
+                </ol>
+            </nav>
+
+            <div class="text-center mb-5">
+                <div class="display-1 text-primary mb-3">
+                    <i class="fas fa-file-upload"></i>
+                </div>
+                <h1 class="display-5 mb-3">Add New Book to Course</h1>
+                <p class="lead text-muted">Upload a PDF textbook and our AI will transform it into interactive, personalized learning content.</p>
+            </div>
+
+            <!-- Upload Form -->
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-book me-2"></i>Upload Academic PDF
+                        <span class="badge bg-light text-primary ms-2">{{ course.name }}</span>
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                        <!-- Subject Name -->
+                        <div class="mb-4">
+                            <label for="subject_name" class="form-label fw-medium">
+                                <i class="fas fa-tag me-2"></i>Subject/Book Name *
+                            </label>
+                            <input type="text" 
+                                   class="form-control form-control-lg" 
+                                   id="subject_name" 
+                                   name="subject_name" 
+                                   placeholder="e.g., Microeconomics, Data Structures & Algorithms, Organic Chemistry"
+                                   required>
+                            <div class="form-text">This will be used to identify the book and help AI understand the content context.</div>
+                        </div>
+
+                        <!-- Course Description (for context) -->
+                        <div class="mb-4">
+                            <label for="course_description" class="form-label fw-medium">
+                                <i class="fas fa-info-circle me-2"></i>Additional Context (Optional)
+                            </label>
+                            <textarea class="form-control" 
+                                      id="course_description" 
+                                      name="course_description" 
+                                      rows="3"
+                                      placeholder="Any specific focus areas, assignment requirements, or learning objectives for this book...">{{ course.description or '' }}</textarea>
+                            <div class="form-text">This helps the AI tailor the content transformation to your specific needs.</div>
+                        </div>
+
+                        <!-- PDF File Upload -->
+                        <div class="mb-4">
+                            <label for="pdf_file" class="form-label fw-medium">
+                                <i class="fas fa-file-pdf me-2"></i>PDF File *
+                            </label>
+                            <div class="upload-area border border-2 border-dashed rounded p-4 text-center" id="uploadArea">
+                                <div class="upload-content">
+                                    <i class="fas fa-cloud-upload-alt text-primary mb-3" style="font-size: 3rem;"></i>
+                                    <h5>Drag and drop your PDF here</h5>
+                                    <p class="text-muted mb-3">or click to browse files</p>
+                                    <input type="file" 
+                                           class="form-control d-none" 
+                                           id="pdf_file" 
+                                           name="pdf_file" 
+                                           accept=".pdf" 
+                                           required>
+                                    <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('pdf_file').click()">
+                                        Choose PDF File
+                                    </button>
+                                </div>
+                                <div class="upload-progress d-none">
+                                    <div class="mb-3">
+                                        <i class="fas fa-file-pdf text-danger me-2"></i>
+                                        <span id="fileName"></span>
+                                        <span class="text-muted ms-2" id="fileSize"></span>
+                                    </div>
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar" id="uploadProgressBar" style="width: 0%"></div>
+                                    </div>
+                                    <small class="text-muted" id="uploadStatus">Ready to upload</small>
+                                </div>
+                            </div>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Maximum file size: 100MB. Best results with text-based PDFs (not scanned images).
+                            </div>
+                        </div>
+
+                        <!-- Expected Processing Info -->
+                        <div class="alert alert-info">
+                            <div class="row align-items-center">
+                                <div class="col-md-2 text-center">
+                                    <i class="fas fa-robot" style="font-size: 2rem;"></i>
+                                </div>
+                                <div class="col-md-10">
+                                    <h6 class="alert-heading mb-2">
+                                        <i class="fas fa-magic me-2"></i>AI-Powered Content Transformation
+                                    </h6>
+                                    <p class="mb-2">Our AI will automatically:</p>
+                                    <ul class="mb-0 small">
+                                        <li><strong>Detect subject domain</strong> and adapt explanations accordingly</li>
+                                        <li><strong>Simplify complex concepts</strong> with real-world examples</li>
+                                        <li><strong>Create interactive content</strong> like charts, quizzes, and calculators</li>
+                                        <li><strong>Add career applications</strong> and professional context</li>
+                                        <li><strong>Generate study materials</strong> optimized for your learning level</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Existing Books Context -->
+                        {% if course.subjects %}
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">
+                                <i class="fas fa-books me-2"></i>Existing Books in Course
+                            </label>
+                            <div class="existing-books bg-light rounded p-3">
+                                <p class="small text-muted mb-2">The AI will consider these existing books for context and integration:</p>
+                                <div class="row">
+                                    {% for subject in course.subjects %}
+                                    <div class="col-md-6 mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge domain-badge bg-{{ subject.subject_domain }} me-2">
+                                                {{ subject.get_domain_display_name() }}
+                                            </span>
+                                            <span class="small">{{ subject.name }}</span>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                            <a href="{{ url_for('view_course', course_id=course.id) }}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Course
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg px-5" id="submitBtn">
+                                <span class="btn-text">
+                                    <i class="fas fa-magic me-2"></i>Transform with AI
+                                </span>
+                                <span class="btn-spinner d-none">
+                                    <span class="spinner-border spinner-border-sm me-2"></span>
+                                    Processing...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Processing Timeline -->
+            <div class="card border-0 bg-light mt-4">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="fas fa-clock text-info me-2"></i>What to Expect
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="bg-primary text-white rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-upload"></i>
+                            </div>
+                            <h6>Upload</h6>
+                            <small class="text-muted">File uploaded to AI processing system</small>
+                        </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="bg-secondary text-white rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h6>Analysis</h6>
+                            <small class="text-muted">AI analyzes content and detects subject domain</small>
+                        </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="bg-success text-white rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <h6>Transform</h6>
+                            <small class="text-muted">Content adapted for interactive learning</small>
+                        </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="bg-warning text-dark rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <h6>Ready!</h6>
+                            <small class="text-muted">Interactive content ready for studying</small>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Processing time: 2-10 minutes depending on PDF size and complexity
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tips for Best Results -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>Tips for Best Results
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-success">✓ Best Practices</h6>
+                            <ul class="list-unstyled small">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Use text-based PDFs (not scanned images)
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Include charts and diagrams for rich content
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Provide clear, descriptive subject names
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Add context about your learning goals
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-warning">⚠ Limitations</h6>
+                            <ul class="list-unstyled small">
+                                <li class="mb-2">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                    Scanned PDFs may have lower accuracy
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                    Very large files (>100MB) not supported
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                    Password-protected PDFs need to be unlocked first
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                    Processing time varies with content complexity
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Processing Modal -->
+<div class="modal fade" id="processingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-5">
+                <div class="mb-4">
+                    <div class="spinner-border text-primary" style="width: 4rem; height: 4rem;"></div>
+                </div>
+                <h5 class="mb-3">AI is Processing Your PDF</h5>
+                <p class="text-muted mb-4" id="processingStatus">Analyzing content and detecting subject domain...</p>
+                
+                <div class="progress mb-3" style="height: 8px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         id="processingProgress" style="width: 10%"></div>
+                </div>
+                
+                <div class="small text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    This may take 2-10 minutes depending on file size
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let uploadedFile = null;
+    let processingModal = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        processingModal = new bootstrap.Modal(document.getElementById('processingModal'));
+        setupFileUpload();
+        setupFormSubmission();
+    });
+
+    function setupFileUpload() {
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('pdf_file');
+        const uploadContent = uploadArea.querySelector('.upload-content');
+        const uploadProgress = uploadArea.querySelector('.upload-progress');
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('border-primary', 'bg-light');
+        });
+
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('border-primary', 'bg-light');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('border-primary', 'bg-light');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type === 'application/pdf') {
+                fileInput.files = files;
+                handleFileSelection(files[0]);
+            } else {
+                showToast('Please select a valid PDF file', 'warning');
+            }
+        });
+
+        // Click to upload
+        uploadArea.addEventListener('click', function() {
+            if (!uploadedFile) {
+                fileInput.click();
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                handleFileSelection(e.target.files[0]);
+            }
+        });
+    }
+
+    function handleFileSelection(file) {
+        if (file.type !== 'application/pdf') {
+            showToast('Please select a PDF file', 'warning');
+            return;
+        }
+
+        if (file.size > 100 * 1024 * 1024) { // 100MB
+            showToast('File size must be less than 100MB', 'warning');
+            return;
+        }
+
+        uploadedFile = file;
+        
+        // Show file info
+        const uploadContent = document.querySelector('.upload-content');
+        const uploadProgress = document.querySelector('.upload-progress');
+        
+        uploadContent.classList.add('d-none');
+        uploadProgress.classList.remove('d-none');
+        
+        document.getElementById('fileName').textContent = file.name;
+        document.getElementById('fileSize').textContent = formatFileSize(file.size);
+        document.getElementById('uploadStatus').textContent = 'File selected - ready to process';
+        document.getElementById('uploadProgressBar').style.width = '100%';
+        document.getElementById('uploadProgressBar').classList.add('bg-success');
+
+        // Auto-populate subject name if not filled
+        const subjectNameInput = document.getElementById('subject_name');
+        if (!subjectNameInput.value) {
+            const fileName = file.name.replace(/\.pdf$/i, '');
+            const cleanName = fileName.replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            subjectNameInput.value = cleanName;
+        }
+
+        // Enable submit button
+        document.getElementById('submitBtn').disabled = false;
+    }
+
+    function formatFileSize(bytes) {
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        if (bytes === 0) return '0 Byte';
+        const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+        return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    function setupFormSubmission() {
+        const form = document.getElementById('uploadForm');
+        
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!uploadedFile) {
+                showToast('Please select a PDF file', 'warning');
+                return;
+            }
+
+            const subjectName = document.getElementById('subject_name').value.trim();
+            if (!subjectName) {
+                showToast('Please enter a subject name', 'warning');
+                document.getElementById('subject_name').focus();
+                return;
+            }
+
+            startProcessing();
+            submitForm();
+        });
+    }
+
+    function startProcessing() {
+        // Show processing modal
+        processingModal.show();
+        
+        // Disable form
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnSpinner = submitBtn.querySelector('.btn-spinner');
+        
+        btnText.classList.add('d-none');
+        btnSpinner.classList.remove('d-none');
+        submitBtn.disabled = true;
+
+        // Start progress simulation
+        simulateProgress();
+    }
+
+    function simulateProgress() {
+        const statusMessages = [
+            'Uploading file to AI system...',
+            'Analyzing PDF structure and content...',
+            'Detecting subject domain and complexity...',
+            'Extracting chapters and key concepts...',
+            'Generating interactive content blocks...',
+            'Creating personalized learning materials...',
+            'Optimizing for your academic level...',
+            'Finalizing content transformation...'
+        ];
+
+        let progress = 10;
+        let messageIndex = 0;
+
+        const progressInterval = setInterval(() => {
+            progress += Math.random() * 15;
+            
+            if (progress > 95) {
+                progress = 95;
+            }
+
+            // Update progress bar
+            document.getElementById('processingProgress').style.width = progress + '%';
+
+            // Update status message
+            if (messageIndex < statusMessages.length - 1 && progress > (messageIndex + 1) * 12) {
+                messageIndex++;
+                document.getElementById('processingStatus').textContent = statusMessages[messageIndex];
+            }
+
+            // The actual form submission will complete and redirect
+            // This is just for user feedback during processing
+        }, 2000 + Math.random() * 3000);
+
+        // Store interval ID to clear it if needed
+        window.processingInterval = progressInterval;
+    }
+
+    function submitForm() {
+        const form = document.getElementById('uploadForm');
+        const formData = new FormData(form);
+
+        fetch(form.action || window.location.href, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.text();
+            }
+            throw new Error('Upload failed');
+        })
+        .then(html => {
+            // Check if response is a redirect (success)
+            if (html.includes('Successfully processed') || html.includes('view_subject')) {
+                // Complete progress
+                document.getElementById('processingProgress').style.width = '100%';
+                document.getElementById('processingStatus').textContent = 'Processing complete! Redirecting...';
+                
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                // Handle error in response
+                throw new Error('Processing failed');
+            }
+        })
+        .catch(error => {
+            console.error('Upload error:', error);
+            
+            // Clear processing interval
+            if (window.processingInterval) {
+                clearInterval(window.processingInterval);
+            }
+            
+            // Hide processing modal
+            processingModal.hide();
+            
+            // Reset form
+            resetForm();
+            
+            showToast('Upload failed. Please try again.', 'danger');
+        });
+    }
+
+    function resetForm() {
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnSpinner = submitBtn.querySelector('.btn-spinner');
+        
+        btnText.classList.remove('d-none');
+        btnSpinner.classList.add('d-none');
+        submitBtn.disabled = false;
+
+        // Reset file upload display
+        const uploadContent = document.querySelector('.upload-content');
+        const uploadProgress = document.querySelector('.upload-progress');
+        
+        uploadContent.classList.remove('d-none');
+        uploadProgress.classList.add('d-none');
+        
+        uploadedFile = null;
+        document.getElementById('pdf_file').value = '';
+    }
+
+    // Handle page unload to clear processing
+    window.addEventListener('beforeunload', function() {
+        if (window.processingInterval) {
+            clearInterval(window.processingInterval);
+        }
+    });
+</script>
+{% endblock %}

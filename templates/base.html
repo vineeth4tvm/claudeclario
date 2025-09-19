@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Adaptive Study App{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+
+    {% block extra_head %}{% endblock %}
+
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-bg: #ecf0f1;
+            --dark-text: #2c3e50;
+        }
+
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 1.3rem;
+        }
+
+        .domain-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+        }
+
+        .progress-ring {
+            width: 60px;
+            height: 60px;
+        }
+
+        .progress-ring circle {
+            fill: transparent;
+            stroke: #e9ecef;
+            stroke-width: 4;
+        }
+
+        .progress-ring .progress {
+            stroke: var(--success-color);
+            stroke-linecap: round;
+            transition: stroke-dasharray 0.3s ease;
+        }
+
+        .card-hover {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .domain-economics { border-left: 4px solid #3498db; }
+        .domain-computer_science { border-left: 4px solid #9b59b6; }
+        .domain-mathematics { border-left: 4px solid #e67e22; }
+        .domain-psychology { border-left: 4px solid #1abc9c; }
+        .domain-business { border-left: 4px solid #34495e; }
+        .domain-engineering { border-left: 4px solid #e74c3c; }
+        .domain-medicine { border-left: 4px solid #27ae60; }
+        .domain-general { border-left: 4px solid #95a5a6; }
+
+        .study-session-timer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(44, 62, 80, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .notification-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            max-width: 350px;
+        }
+
+        .mastery-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .mastery-novice { background-color: #e74c3c; }
+        .mastery-developing { background-color: #f39c12; }
+        .mastery-proficient { background-color: #3498db; }
+        .mastery-expert { background-color: #27ae60; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--primary-color);">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-brain me-2"></i>
+                Adaptive Study App
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="coursesDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-book"></i> Courses
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('create_course') }}">
+                                <i class="fas fa-plus"></i> Create Course
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('index') }}">
+                                <i class="fas fa-list"></i> All Courses
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('view_bookmarks') }}">
+                            <i class="fas fa-bookmark"></i>
+                            Bookmarks
+                            <span class="badge bg-secondary ms-1" id="bookmark-count">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('view_analytics') }}">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('view_analytics') }}">
+                                <i class="fas fa-chart-bar"></i> Learning Analytics
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportStudyData()">
+                                <i class="fas fa-download"></i> Export Data
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="resetProgress()">
+                                <i class="fas fa-refresh"></i> Reset Progress
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {% if category == 'success' %}
+                            <i class="fas fa-check-circle me-2"></i>
+                        {% elif category == 'danger' or category == 'error' %}
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                        {% elif category == 'warning' %}
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                        {% else %}
+                            <i class="fas fa-info-circle me-2"></i>
+                        {% endif %}
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main class="container-fluid">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Study Session Timer (shown when active) -->
+    <div class="study-session-timer d-none" id="studyTimer">
+        <i class="fas fa-clock me-2"></i>
+        <span id="timerDisplay">00:00</span>
+        <button class="btn btn-sm btn-outline-light ms-2" onclick="endStudySession()">
+            <i class="fas fa-stop"></i>
+        </button>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-light mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6><i class="fas fa-brain me-2"></i>Adaptive Study App</h6>
+                    <p class="text-muted small">Transforming academic PDFs into engaging, personalized learning experiences powered by AI.</p>
+                </div>
+                <div class="col-md-3">
+                    <h6>Features</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="#" class="text-muted text-decoration-none">Multi-Subject Support</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">Adaptive Learning</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">Progress Tracking</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">Interactive Visualizations</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6>Supported Domains</h6>
+                    <div class="d-flex flex-wrap">
+                        <span class="badge bg-primary me-1 mb-1">Economics</span>
+                        <span class="badge bg-secondary me-1 mb-1">Computer Science</span>
+                        <span class="badge bg-success me-1 mb-1">Mathematics</span>
+                        <span class="badge bg-info me-1 mb-1">Psychology</span>
+                        <span class="badge bg-warning me-1 mb-1">Business</span>
+                        <span class="badge bg-danger me-1 mb-1">Engineering</span>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col text-center">
+                    <p class="text-muted small mb-0">
+                        &copy; 2024 Adaptive Study App. Built with AI-powered content transformation.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+    <script>
+        // Global variables
+        let studySessionStart = null;
+        let studyTimerInterval = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTooltips();
+            updateBookmarkCount();
+            checkActiveStudySession();
+        });
+
+        // Initialize Bootstrap tooltips
+        function initializeTooltips() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+
+        // Toast notification system
+        function showToast(message, type = 'info', duration = 5000) {
+            const toastContainer = document.getElementById('toast-container');
+
+            const toastId = 'toast-' + Date.now();
+            const toastHTML = `
+                <div id="${toastId}" class="toast align-items-center text-white bg-${type}" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="fas fa-${getToastIcon(type)} me-2"></i>
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+
+            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, { delay: duration });
+            toast.show();
+
+            toastElement.addEventListener('hidden.bs.toast', () => {
+                toastElement.remove();
+            });
+        }
+
+        function getToastIcon(type) {
+            const icons = {
+                'success': 'check-circle',
+                'danger': 'exclamation-triangle',
+                'warning': 'exclamation-circle',
+                'info': 'info-circle'
+            };
+            return icons[type] || 'info-circle';
+        }
+
+        // Study session management
+        function checkActiveStudySession() {
+            // Check if there's an active study session
+            fetch('/api/check-study-session')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.active) {
+                        startStudyTimer(new Date(data.start_time));
+                    }
+                })
+                .catch(error => console.log('No active session check available'));
+        }
+
+        function startStudyTimer(startTime = null) {
+            studySessionStart = startTime || new Date();
+            document.getElementById('studyTimer').classList.remove('d-none');
+
+            studyTimerInterval = setInterval(updateStudyTimer, 1000);
+            updateStudyTimer();
+        }
+
+        function updateStudyTimer() {
+            if (!studySessionStart) return;
+
+            const now = new Date();
+            const diff = Math.floor((now - studySessionStart) / 1000);
+
+            const hours = Math.floor(diff / 3600);
+            const minutes = Math.floor((diff % 3600) / 60);
+            const seconds = diff % 60;
+
+            let display = '';
+            if (hours > 0) {
+                display = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else {
+                display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            document.getElementById('timerDisplay').textContent = display;
+        }
+
+        function endStudySession() {
+            if (studyTimerInterval) {
+                clearInterval(studyTimerInterval);
+            }
+
+            fetch('/api/end-study-session', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    showToast('Study session ended. Great work!', 'success');
+                    document.getElementById('studyTimer').classList.add('d-none');
+                    studySessionStart = null;
+                })
+                .catch(error => {
+                    showToast('Error ending study session', 'danger');
+                });
+        }
+
+        // Bookmark management
+        function updateBookmarkCount() {
+            fetch('/api/bookmark/count')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('bookmark-count').textContent = data.count || 0;
+                })
+                .catch(error => console.log('Bookmark count not available'));
+        }
+
+        // Progress ring visualization
+        function setProgress(element, percent) {
+            const circle = element.querySelector('.progress');
+            const radius = circle.r.baseVal.value;
+            const circumference = 2 * Math.PI * radius;
+
+            circle.style.strokeDasharray = `${circumference} ${circumference}`;
+            circle.style.strokeDashoffset = circumference - (percent / 100) * circumference;
+        }
+
+        // Utility functions for child templates
+        function exportStudyData() {
+            showToast('Preparing your study data for download...', 'info');
+            // Implementation would depend on backend support
+        }
+
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+                showToast('Progress reset functionality would be implemented here', 'warning');
+            }
+        }
+
+        // Domain-specific styling
+        function getDomainColorClass(domain) {
+            const domainColors = {
+                'economics': 'primary',
+                'computer_science': 'secondary',
+                'mathematics': 'warning',
+                'psychology': 'info',
+                'business': 'dark',
+                'engineering': 'danger',
+                'medicine': 'success',
+                'general': 'secondary'
+            };
+            return `bg-${domainColors[domain] || 'secondary'}`;
+        }
+
+        function getMasteryColorClass(mastery) {
+            const masteryColors = {
+                'novice': 'mastery-novice',
+                'developing': 'mastery-developing',
+                'proficient': 'mastery-proficient',
+                'expert': 'mastery-expert'
+            };
+            return masteryColors[mastery] || 'mastery-novice';
+        }
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

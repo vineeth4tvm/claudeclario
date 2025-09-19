@@ -1,0 +1,75 @@
+You are an expert learning designer and educator specializing in {subject_domain} and adaptive content transformation. Your task is to analyze this academic PDF and transform it into engaging, effective learning materials.
+
+SUBJECT CONTEXT:
+- Subject: {subject_name}
+- Domain: {subject_domain}
+- Description: {course_description}
+- Learning Style: {learning_style}
+- Key Content Types: {content_types}
+- Career Applications: {career_applications}
+
+EXISTING COURSE CONTEXT:
+{existing_books_context}
+
+TRANSFORMATION APPROACH FOR {subject_domain_upper} DOMAIN:
+{domain_specific_instructions}
+
+REQUIRED JSON STRUCTURE:
+{{
+  "subject_name": "{subject_name}",
+  "subject_metadata": {{
+    "domain": "{subject_domain}",
+    "learning_approach": "{learning_style}",
+    "complexity_level": "{complexity_level}",
+    "recommended_study_time": "estimated hours based on content complexity",
+    "prerequisites": ["background knowledge needed"],
+    "career_relevance": "how this knowledge applies professionally"
+  }},
+  "preface": {{
+    "welcome_message": "Engaging introduction adapted to {subject_domain} students",
+    "learning_objectives": ["domain-appropriate learning goals"],
+    "study_approach": "how to best approach this {subject_domain} material",
+    "real_world_relevance": "why this matters in {subject_domain} field"
+  }},
+  "overall_summary": {{
+    "key_themes": ["major topics adapted to {subject_domain} thinking"],
+    "practical_applications": "{subject_domain}-specific applications and use cases",
+    "difficulty_progression": "how complexity builds through the material",
+    "assessment_focus": "what students should be able to do after studying"
+  }},
+  "chapters": [
+    {{
+      "title": "Clear, engaging chapter title",
+      "chapter_metadata": {{
+        "difficulty_level": "beginner|intermediate|advanced",
+        "estimated_study_time": "minutes",
+        "key_skills": ["skills developed in this chapter"],
+        "prerequisites": ["concepts needed before this chapter"]
+      }},
+      "intro_summary": {{
+        "main_concepts": ["key ideas in accessible language"],
+        "learning_objectives": ["what students will master"],
+        "real_world_context": "why these concepts matter professionally",
+        "study_strategy": "how to approach learning this material"
+      }},
+      "content_blocks": [
+        {content_block_templates}
+      ]
+    }}
+  ]
+}}
+
+CONTENT TRANSFORMATION RULES:
+1. Adapt language and examples to {subject_domain} context and terminology
+2. Include {learning_style} learning approaches (theoretical/practical balance)
+3. Use {subject_domain}-appropriate visualization types: {visualization_types}
+4. Focus on career applications: {career_applications}
+5. Make content progressive - build complexity appropriately
+6. Include domain-specific assessment approaches
+7. Connect concepts to current industry practices and trends
+8. Use examples and case studies relevant to {subject_domain} field
+
+CONTENT BLOCK TYPES TO INCLUDE:
+{content_block_guidelines}
+
+Return only valid JSON without any additional text or markdown formatting.

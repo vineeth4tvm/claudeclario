@@ -1,0 +1,563 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.name }} - Course Overview{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Course Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">{{ course.name }}</li>
+                </ol>
+            </nav>
+
+            <div class="bg-gradient-primary text-white rounded-3 p-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center mb-2">
+                            <h1 class="display-6 mb-0 me-3">{{ course.name }}</h1>
+                            <span class="badge bg-light text-dark">{{ course.academic_level|title }}</span>
+                        </div>
+                        {% if course.description %}
+                            <p class="lead mb-2">{{ course.description }}</p>
+                        {% endif %}
+                        {% if course.institution %}
+                            <p class="mb-0"><i class="fas fa-university me-2"></i>{{ course.institution }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="d-flex justify-content-end gap-3">
+                            <div class="text-center">
+                                <div class="h3 mb-0">{{ progress_summary.overall_progress or 0 }}%</div>
+                                <small>Overall Progress</small>
+                            </div>
+                            <div class="text-center">
+                                <div class="h3 mb-0">{{ progress_summary.subjects_completed or "0/0" }}</div>
+                                <small>Subjects</small>
+                            </div>
+                            <div class="text-center">
+                                <div class="h3 mb-0">{{ progress_summary.total_study_time_hours or 0 }}h</div>
+                                <small>Study Time</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <a href="{{ url_for('upload_pdf', course_id=course.id) }}" class="btn btn-primary btn-lg w-100 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-upload me-2"></i>
+                        Add New Book
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-outline-success btn-lg w-100 d-flex align-items-center justify-content-center" onclick="generateCourseNotes()">
+                        <i class="fas fa-file-alt me-2"></i>
+                        Course Notes
+                    </button>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-outline-info btn-lg w-100 d-flex align-items-center justify-content-center" onclick="showProgressModal()">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Detailed Progress
+                    </button>
+                </div>
+            </div>
+
+            <!-- Subjects Section -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3><i class="fas fa-books me-2"></i>Course Subjects</h3>
+                <div>
+                    <span class="badge bg-primary me-2">{{ subjects_with_progress|length }} Subjects</span>
+                    <span class="badge bg-secondary">{{ course.total_chapters }} Chapters</span>
+                </div>
+            </div>
+
+            {% if subjects_with_progress %}
+                <div class="row">
+                    {% for item in subjects_with_progress %}
+                    {% set subject = item.subject %}
+                    {% set overall_progress = item.overall_progress %}
+                    {% set chapter_progress = item.chapter_progress %}
+
+                    <div class="col-lg-6 mb-4">
+                        <div class="card card-hover border-0 shadow-sm h-100 domain-{{ subject.subject_domain }}">
+                            <div class="card-body">
+                                <!-- Subject Header -->
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="flex-grow-1">
+                                        <h5 class="card-title mb-1">
+                                            <a href="{{ url_for('view_subject', course_id=course.id, subject_id=subject.id) }}"
+                                               class="text-decoration-none">
+                                                {{ subject.name }}
+                                            </a>
+                                        </h5>
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge domain-badge bg-{{ subject.subject_domain }} me-2">
+                                                {{ subject.get_domain_display_name() }}
+                                            </span>
+                                            <span class="badge bg-light text-dark">{{ subject.complexity_level|title }}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Progress Indicator -->
+                                    <div class="progress-ring ms-3">
+                                        <svg width="50" height="50">
+                                            <circle cx="25" cy="25" r="20" stroke="#e9ecef" stroke-width="3" fill="transparent"/>
+                                            <circle class="progress" cx="25" cy="25" r="20" stroke="#28a745" stroke-width="3" fill="transparent"
+                                                    style="stroke-linecap: round; stroke-dasharray: 125.66; stroke-dashoffset: {{ 125.66 - (125.66 * ((overall_progress.completion_percentage if overall_progress else 0) / 100)) }};"/>
+                                        </svg>
+                                        <div class="position-absolute top-50 start-50 translate-middle">
+                                            <small class="fw-bold">{{ (overall_progress.completion_percentage if overall_progress else 0)|int }}%</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Subject Stats -->
+                                <div class="row g-2 mb-3 text-center">
+                                    <div class="col-4">
+                                        <div class="small text-muted">Chapters</div>
+                                        <div class="fw-bold">{{ subject.total_chapters }}</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="small text-muted">Est. Time</div>
+                                        <div class="fw-bold">{{ (subject.estimated_read_time / 60)|round(1) }}h</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="small text-muted">Interactive</div>
+                                        <div class="fw-bold">{{ subject.interactive_elements_count }}</div>
+                                    </div>
+                                </div>
+
+                                <!-- Chapter Progress Preview -->
+                                {% if subject.chapters %}
+                                <div class="mb-3">
+                                    <div class="small text-muted mb-2">Chapter Progress</div>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for chapter in subject.chapters[:8] %}
+                                            {% set ch_progress = chapter_progress.get(chapter.id) %}
+                                            <div class="progress-dot"
+                                                 style="width: 12px; height: 12px; border-radius: 50%;
+                                                        background-color: {% if ch_progress and ch_progress.status == 'completed' %}#28a745{% elif ch_progress and ch_progress.status == 'in_progress' %}#ffc107{% else %}#e9ecef{% endif %};"
+                                                 data-bs-toggle="tooltip"
+                                                 title="{{ chapter.title }} - {{ ch_progress.status|title if ch_progress else 'Not Started' }}">
+                                            </div>
+                                        {% endfor %}
+                                        {% if subject.chapters|length > 8 %}
+                                            <span class="small text-muted">+{{ subject.chapters|length - 8 }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Learning Insights -->
+                                {% if overall_progress %}
+                                <div class="mb-3">
+                                    <div class="small text-muted mb-2">Learning Insights</div>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center">
+                                            <span class="mastery-indicator {{ getMasteryColorClass(overall_progress.mastery_level if overall_progress else 'novice') }}"></span>
+                                            <small>{{ overall_progress.mastery_level|title if overall_progress else 'Novice' }} Level</small>
+                                        </div>
+                                        {% if overall_progress.avg_quiz_score > 0 %}
+                                        <div class="small">
+                                            <i class="fas fa-brain me-1"></i>{{ overall_progress.avg_quiz_score|round(1) }}% avg quiz
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Action Buttons -->
+                                <div class="d-flex gap-2">
+                                    <a href="{{ url_for('view_subject', course_id=course.id, subject_id=subject.id) }}"
+                                       class="btn btn-primary btn-sm flex-fill">
+                                        <i class="fas fa-play me-1"></i>
+                                        {% if overall_progress and overall_progress.status == 'completed' %}
+                                            Review
+                                        {% elif overall_progress and overall_progress.status == 'in_progress' %}
+                                            Continue
+                                        {% else %}
+                                            Start
+                                        {% endif %}
+                                    </a>
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-h"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#" onclick="bookmarkSubject({{ subject.id }})">
+                                                <i class="fas fa-bookmark me-2"></i>Bookmark
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="exportSubjectNotes({{ subject.id }})">
+                                                <i class="fas fa-download me-2"></i>Export Notes
+                                            </a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item" href="#" onclick="resetSubjectProgress({{ subject.id }})">
+                                                <i class="fas fa-redo me-2"></i>Reset Progress
+                                            </a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <!-- Empty State -->
+                <div class="text-center py-5">
+                    <div class="display-1 text-muted mb-3">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h4 class="mb-3">No subjects yet</h4>
+                    <p class="text-muted mb-4">Upload your first PDF to get started with AI-powered learning content.</p>
+                    <a href="{{ url_for('upload_pdf', course_id=course.id) }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-upload me-2"></i>Upload Your First Book
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <!-- AI Recommendations -->
+            {% if recommendations %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="fas fa-robot me-2"></i>AI Study Plan</h6>
+                </div>
+                <div class="card-body">
+                    <!-- Study Schedule -->
+                    <div class="mb-3">
+                        <h6 class="small text-muted mb-2">RECOMMENDED SCHEDULE</h6>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-clock text-info me-2"></i>
+                            <span class="small">{{ recommendations.study_schedule.recommended_minutes_per_day }} min/day</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-calendar text-info me-2"></i>
+                            <span class="small">{{ recommendations.progress_goals.weekly_chapters }} chapters/week</span>
+                        </div>
+                    </div>
+
+                    <!-- Next Chapters -->
+                    {% if recommendations.content_focus.next_chapters %}
+                    <div class="mb-3">
+                        <h6 class="small text-muted mb-2">UP NEXT</h6>
+                        {% for chapter in recommendations.content_focus.next_chapters[:3] %}
+                        <div class="d-flex align-items-center mb-1">
+                            <i class="fas fa-arrow-right text-primary me-2"></i>
+                            <small class="text-truncate">{{ chapter.title }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Focus Areas -->
+                    {% if recommendations.content_focus.review_subjects %}
+                    <div class="mb-3">
+                        <h6 class="small text-muted mb-2">NEEDS ATTENTION</h6>
+                        {% for subject in recommendations.content_focus.review_subjects %}
+                        <span class="badge bg-warning text-dark me-1 mb-1">{{ subject|title }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Learning Strategies -->
+                    {% if recommendations.learning_strategies %}
+                    <div>
+                        <h6 class="small text-muted mb-2">STUDY TIPS</h6>
+                        {% for strategy in recommendations.learning_strategies[:2] %}
+                        <div class="small mb-1">
+                            <i class="fas fa-lightbulb text-warning me-1"></i>
+                            {{ strategy }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Course Stats -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Course Statistics</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 text-center">
+                        <div class="col-6">
+                            <div class="h5 mb-1 text-primary">{{ progress_summary.chapters_completed or "0/0" }}</div>
+                            <div class="small text-muted">Chapters Done</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="h5 mb-1 text-success">{{ progress_summary.average_quiz_score or 0 }}%</div>
+                            <div class="small text-muted">Quiz Average</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="h5 mb-1 text-info">{{ progress_summary.quizzes_taken or 0 }}</div>
+                            <div class="small text-muted">Quizzes Taken</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="h5 mb-1 text-warning">{{ progress_summary.total_study_time_hours or 0 }}h</div>
+                            <div class="small text-muted">Study Time</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subject Domains -->
+            {% if subjects_with_progress %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-tags me-2"></i>Subject Areas</h6>
+                </div>
+                <div class="card-body">
+                    {% set domain_counts = {} %}
+                    {% for item in subjects_with_progress %}
+                        {% set domain = item.subject.subject_domain %}
+                        {% if domain_counts.update({domain: domain_counts.get(domain, 0) + 1}) %}{% endif %}
+                    {% endfor %}
+
+                    {% for domain, count in domain_counts.items() %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <span class="badge domain-badge bg-{{ domain }} me-2">{{ domain.replace('_', ' ')|title }}</span>
+                        </div>
+                        <span class="small text-muted">{{ count }} subject{{ 's' if count != 1 else '' }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Quick Actions -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-tools me-2"></i>Quick Tools</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary btn-sm" onclick="generateCourseNotes()">
+                            <i class="fas fa-file-alt me-2"></i>Export Course Notes
+                        </button>
+                        <button class="btn btn-outline-success btn-sm" onclick="scheduleStudySession()">
+                            <i class="fas fa-calendar-plus me-2"></i>Schedule Study
+                        </button>
+                        <button class="btn btn-outline-info btn-sm" onclick="shareProgress()">
+                            <i class="fas fa-share me-2"></i>Share Progress
+                        </button>
+                        <hr>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="exportCourseData()">
+                            <i class="fas fa-download me-2"></i>Export Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Progress Details Modal -->
+<div class="modal fade" id="progressModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-chart-line me-2"></i>Detailed Progress Report
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="progressModalBody">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips for chapter progress dots
+        initializeTooltips();
+    });
+
+    function showProgressModal() {
+        const modal = new bootstrap.Modal(document.getElementById('progressModal'));
+        modal.show();
+
+        // Load detailed progress data
+        fetch(`/api/course/{{ course.id }}/detailed-progress`)
+            .then(response => response.json())
+            .then(data => {
+                renderProgressDetails(data);
+            })
+            .catch(error => {
+                document.getElementById('progressModalBody').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error loading progress data. Please try again.
+                    </div>
+                `;
+            });
+    }
+
+    function renderProgressDetails(data) {
+        const modalBody = document.getElementById('progressModalBody');
+
+        let html = `
+            <div class="row mb-4">
+                <div class="col-md-3 text-center">
+                    <div class="h3 text-primary">${data.overall_progress || 0}%</div>
+                    <div class="small text-muted">Overall Progress</div>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="h3 text-success">${data.completed_chapters || 0}</div>
+                    <div class="small text-muted">Chapters Complete</div>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="h3 text-info">${data.total_study_hours || 0}h</div>
+                    <div class="small text-muted">Study Time</div>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="h3 text-warning">${data.average_quiz_score || 0}%</div>
+                    <div class="small text-muted">Quiz Average</div>
+                </div>
+            </div>
+        `;
+
+        if (data.subject_progress) {
+            html += `
+                <h6>Subject Breakdown</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Progress</th>
+                                <th>Mastery</th>
+                                <th>Quiz Avg</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            data.subject_progress.forEach(subject => {
+                html += `
+                    <tr>
+                        <td>${subject.name}</td>
+                        <td>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar" style="width: ${subject.progress}%"></div>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-secondary">${subject.mastery}</span></td>
+                        <td>${subject.quiz_average}%</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        modalBody.innerHTML = html;
+    }
+
+    function bookmarkSubject(subjectId) {
+        fetch('/api/bookmark/subject', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                subject_id: subjectId,
+                type: 'subject'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            showToast('Subject bookmarked successfully', 'success');
+        })
+        .catch(error => {
+            showToast('Error bookmarking subject', 'danger');
+        });
+    }
+
+    function exportSubjectNotes(subjectId) {
+        showToast('Generating notes for export...', 'info');
+        // Implementation would generate and download notes
+    }
+
+    function resetSubjectProgress(subjectId) {
+        if (confirm('Are you sure you want to reset progress for this subject? This cannot be undone.')) {
+            fetch(`/api/subject/${subjectId}/reset-progress`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                showToast('Subject progress reset', 'info');
+                location.reload();
+            })
+            .catch(error => {
+                showToast('Error resetting progress', 'danger');
+            });
+        }
+    }
+
+    function generateCourseNotes() {
+        showToast('Generating comprehensive course notes...', 'info');
+        // Implementation would compile all subject notes
+    }
+
+    function scheduleStudySession() {
+        showToast('Study scheduling feature coming soon!', 'info');
+    }
+
+    function shareProgress() {
+        if (navigator.share) {
+            navigator.share({
+                title: 'My Learning Progress',
+                text: `I'm making great progress in {{ course.name }}!`,
+                url: window.location.href
+            });
+        } else {
+            // Fallback: copy to clipboard
+            navigator.clipboard.writeText(window.location.href);
+            showToast('Course link copied to clipboard', 'success');
+        }
+    }
+
+    function exportCourseData() {
+        showToast('Preparing course data for export...', 'info');
+        // Implementation would export all course data
+    }
+
+    function getMasteryColorClass(mastery) {
+        const masteryColors = {
+            'novice': 'mastery-novice',
+            'developing': 'mastery-developing',
+            'proficient': 'mastery-proficient',
+            'expert': 'mastery-expert'
+        };
+        return masteryColors[mastery] || 'mastery-novice';
+    }
+</script>
+{% endblock %}

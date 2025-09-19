@@ -1,0 +1,28 @@
+Simplify this {subject_domain} concept for {difficulty_level} level understanding using {learning_style} learning approach.
+
+ORIGINAL CONCEPT: {concept_text}
+
+SIMPLIFICATION GUIDELINES FOR {subject_domain_upper}:
+{domain_simplification_guidelines}
+
+Transform this concept to be:
+1. Appropriate for {subject_domain} students at {difficulty_level} level
+2. Using {learning_style} approach (theoretical/practical/mixed)
+3. Including examples relevant to {subject_domain} field
+4. Connecting to professional applications in {subject_domain}
+5. Using language and analogies that resonate with {subject_domain} learners
+
+DIFFICULTY LEVEL ADAPTATION:
+{difficulty_adaptations}
+
+LEARNING STYLE ADAPTATION:
+{learning_style_adaptations}
+
+RESPONSE FORMAT:
+1. **Simplified Explanation**: Clear, engaging explanation using appropriate complexity
+2. **Real-World Examples**: 2-3 examples from {subject_domain} practice
+3. **Why It Matters**: Professional relevance and career applications
+4. **Key Takeaways**: Main points to remember
+5. **Next Steps**: How to build on this understanding
+
+Use conversational language while maintaining accuracy. Include analogies and metaphors that work well for {subject_domain} concepts. Make it engaging and memorable.

@@ -1,0 +1,629 @@
+/* =========================================================================
+   Adaptive Study App - Main Stylesheet
+   ========================================================================= */
+
+:root {
+    /* Color Palette */
+    --primary-color: #2c3e50;
+    --primary-light: #34495e;
+    --secondary-color: #3498db;
+    --success-color: #27ae60;
+    --warning-color: #f39c12;
+    --danger-color: #e74c3c;
+    --info-color: #17a2b8;
+    --light-bg: #ecf0f1;
+    --dark-text: #2c3e50;
+
+    /* Domain Colors */
+    --economics-color: #3498db;
+    --computer-science-color: #9b59b6;
+    --mathematics-color: #e67e22;
+    --psychology-color: #1abc9c;
+    --business-color: #34495e;
+    --engineering-color: #e74c3c;
+    --medicine-color: #27ae60;
+    --general-color: #95a5a6;
+
+    /* Typography */
+    --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* Spacing */
+    --border-radius: 8px;
+    --border-radius-lg: 12px;
+    --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --box-shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.15);
+
+    /* Animation */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
+
+/* =========================================================================
+   Base Styles
+   ========================================================================= */
+
+body {
+    font-family: var(--font-family-sans);
+    line-height: 1.6;
+    color: var(--dark-text);
+    background-color: #f8f9fa;
+}
+
+/* =========================================================================
+   Typography Enhancements
+   ========================================================================= */
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.3;
+    margin-bottom: 1rem;
+}
+
+.display-1, .display-2, .display-3, .display-4, .display-5, .display-6 {
+    font-weight: var(--font-weight-bold);
+}
+
+.lead {
+    font-weight: var(--font-weight-normal);
+    color: #000000;
+}
+
+/* =========================================================================
+   Card Enhancements
+   ========================================================================= */
+
+.card {
+    border: none;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--box-shadow);
+    transition: all var(--transition-normal);
+}
+
+.card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow-hover);
+}
+
+.card-header {
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0 !important;
+    border-bottom: none;
+    font-weight: var(--font-weight-semibold);
+}
+
+/* =========================================================================
+   Domain-Specific Styling
+   ========================================================================= */
+
+.domain-economics {
+    border-left: 4px solid var(--economics-color);
+}
+
+.domain-computer_science {
+    border-left: 4px solid var(--computer-science-color);
+}
+
+.domain-mathematics {
+    border-left: 4px solid var(--mathematics-color);
+}
+
+.domain-psychology {
+    border-left: 4px solid var(--psychology-color);
+}
+
+.domain-business {
+    border-left: 4px solid var(--business-color);
+}
+
+.domain-engineering {
+    border-left: 4px solid var(--engineering-color);
+}
+
+.domain-medicine {
+    border-left: 4px solid var(--medicine-color);
+}
+
+.domain-general {
+    border-left: 4px solid var(--general-color);
+}
+
+/* Domain Badge Colors */
+.bg-economics { background-color: var(--economics-color) !important; }
+.bg-computer_science { background-color: var(--computer-science-color) !important; }
+.bg-mathematics { background-color: var(--mathematics-color) !important; }
+.bg-psychology { background-color: var(--psychology-color) !important; }
+.bg-business { background-color: var(--business-color) !important; }
+.bg-engineering { background-color: var(--engineering-color) !important; }
+.bg-medicine { background-color: var(--medicine-color) !important; }
+.bg-general { background-color: var(--general-color) !important; }
+
+/* =========================================================================
+   Progress Indicators
+   ========================================================================= */
+
+.progress-ring {
+    position: relative;
+    display: inline-block;
+}
+
+.progress-ring svg {
+    transform: rotate(-90deg);
+}
+
+.progress-ring circle {
+    fill: transparent;
+    stroke: #e9ecef;
+    stroke-width: 3;
+}
+
+.progress-ring .progress {
+    stroke: var(--success-color);
+    stroke-linecap: round;
+    transition: stroke-dashoffset var(--transition-slow);
+}
+
+.progress-dot {
+    transition: all var(--transition-fast);
+    cursor: help;
+}
+
+.progress-dot:hover {
+    transform: scale(1.2);
+}
+
+/* Mastery Indicators */
+.mastery-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.mastery-novice {
+    background-color: var(--danger-color);
+}
+
+.mastery-developing {
+    background-color: var(--warning-color);
+}
+
+.mastery-proficient {
+    background-color: var(--secondary-color);
+}
+
+.mastery-expert {
+    background-color: var(--success-color);
+}
+
+/* =========================================================================
+   Interactive Elements
+   ========================================================================= */
+
+.btn {
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--border-radius);
+    transition: all var(--transition-fast);
+    border: none;
+}
+
+.btn-lg {
+    border-radius: var(--border-radius-lg);
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Button Loading States */
+.btn .btn-spinner {
+    display: none;
+}
+
+.btn.loading .btn-text {
+    display: none;
+}
+
+.btn.loading .btn-spinner {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* =========================================================================
+   Form Enhancements
+   ========================================================================= */
+
+.form-control {
+    border-radius: var(--border-radius);
+    border: 2px solid #e9ecef;
+    transition: all var(--transition-fast);
+    font-weight: var(--font-weight-normal);
+}
+
+.form-control:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.15);
+}
+
+.form-control.is-valid {
+    border-color: var(--success-color);
+}
+
+.form-control.is-invalid {
+    border-color: var(--danger-color);
+}
+
+.form-label {
+    font-weight: var(--font-weight-medium);
+    color: var(--dark-text);
+    margin-bottom: 0.75rem;
+}
+
+/* =========================================================================
+   Upload Area Styling
+   ========================================================================= */
+
+.upload-area {
+    transition: all var(--transition-normal);
+    cursor: pointer;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.upload-area:hover {
+    border-color: var(--secondary-color) !important;
+    background-color: rgba(52, 152, 219, 0.05) !important;
+}
+
+.upload-area.dragover {
+    border-color: var(--success-color) !important;
+    background-color: rgba(39, 174, 96, 0.05) !important;
+}
+
+/* =========================================================================
+   Study Session Timer
+   ========================================================================= */
+
+.study-session-timer {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: rgba(44, 62, 80, 0.95);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: var(--font-weight-medium);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all var(--transition-normal);
+}
+
+.study-session-timer:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* =========================================================================
+   Content Block Styling
+   ========================================================================= */
+
+.content-block {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border-radius: var(--border-radius-lg);
+    background-color: #fff;
+    box-shadow: var(--box-shadow);
+    position: relative;
+    transition: all var(--transition-normal);
+}
+
+.content-block:hover {
+    box-shadow: var(--box-shadow-hover);
+}
+
+.concept-explanation {
+    border-left: 4px solid var(--success-color);
+    background: linear-gradient(135deg, #f8fff9 0%, #fff 100%);
+}
+
+.interactive-chart {
+    border-left: 4px solid var(--warning-color);
+    background: linear-gradient(135deg, #fff8f3 0%, #fff 100%);
+}
+
+.case-study {
+    border-left: 4px solid var(--info-color);
+    background: linear-gradient(135deg, #f3f8ff 0%, #fff 100%);
+}
+
+.problem-solving {
+    border-left: 4px solid var(--danger-color);
+    background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+}
+
+/* Real-world Example Styling */
+.real-world-example {
+    background-color: rgba(23, 162, 184, 0.1);
+    border-left: 3px solid var(--info-color);
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+}
+
+.career-tip {
+    background-color: rgba(39, 174, 96, 0.1);
+    border-left: 3px solid var(--success-color);
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+}
+
+/* =========================================================================
+   Bookmark System
+   ========================================================================= */
+
+.bookmark-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all var(--transition-fast);
+    z-index: 10;
+}
+
+.bookmark-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--warning-color);
+}
+
+.bookmark-btn.bookmarked {
+    color: var(--warning-color);
+}
+
+.bookmark-btn.bookmarked:hover {
+    color: #e67e22;
+}
+
+/* =========================================================================
+   Chart Container
+   ========================================================================= */
+
+.chart-container {
+    position: relative;
+    height: 400px;
+    margin: 1.5rem 0;
+    background: #fff;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+}
+
+/* =========================================================================
+   Navigation Enhancements
+   ========================================================================= */
+
+.navbar-brand {
+    font-weight: var(--font-weight-semibold);
+    font-size: 1.3rem;
+}
+
+.navbar-nav .nav-link {
+    font-weight: var(--font-weight-medium);
+    transition: color var(--transition-fast);
+}
+
+.navbar-nav .nav-link:hover {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* =========================================================================
+   Badge Enhancements
+   ========================================================================= */
+
+.domain-badge {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 12px;
+    font-weight: var(--font-weight-medium);
+    text-transform: capitalize;
+}
+
+.badge {
+    font-weight: var(--font-weight-medium);
+}
+
+/* =========================================================================
+   Timeline Styling
+   ========================================================================= */
+
+.timeline {
+    position: relative;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 16px;
+    top: 32px;
+    bottom: 32px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--secondary-color), var(--success-color));
+}
+
+/* =========================================================================
+   Loading States
+   ========================================================================= */
+
+.loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* =========================================================================
+   Toast Notifications
+   ========================================================================= */
+
+.toast {
+    border: none;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--box-shadow-hover);
+}
+
+/* =========================================================================
+   Modal Enhancements
+   ========================================================================= */
+
+.modal-content {
+    border: none;
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* =========================================================================
+   Responsive Design
+   ========================================================================= */
+
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .content-block {
+        padding: 1rem;
+    }
+
+    .chart-container {
+        height: 300px;
+    }
+
+    .study-session-timer {
+        bottom: 10px;
+        right: 10px;
+        padding: 8px 16px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .display-6 {
+        font-size: 1.5rem;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+}
+
+/* =========================================================================
+   Utility Classes
+   ========================================================================= */
+
+.text-gradient {
+    background: linear-gradient(135deg, var(--secondary-color), var(--success-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.shadow-soft {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08) !important;
+}
+
+.border-radius-lg {
+    border-radius: var(--border-radius-lg) !important;
+}
+
+.transition-fast {
+    transition: all var(--transition-fast);
+}
+
+.transition-normal {
+    transition: all var(--transition-normal);
+}
+
+/* =========================================================================
+   Animation Classes
+   ========================================================================= */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fadeInUp {
+    animation: fadeInUp 0.5s ease;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.animate-pulse {
+    animation: pulse 2s infinite;
+}
+
+/* =========================================================================
+   Print Styles
+   ========================================================================= */
+
+@media print {
+    .navbar,
+    .study-session-timer,
+    .bookmark-btn,
+    .btn,
+    .modal {
+        display: none !important;
+    }
+
+    .content-block {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        break-inside: avoid;
+    }
+
+    body {
+        background-color: white;
+        color: black;
+    }
+}

@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}Create Course - Adaptive Study App{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <div class="display-1 text-primary mb-3">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h1 class="display-5 mb-3">Create a New Course</h1>
+                <p class="lead text-muted">Organize your learning materials by creating courses that can contain multiple subjects and PDF books.</p>
+            </div>
+
+            <!-- Course Creation Form -->
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Course Details</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        <!-- Course Name -->
+                        <div class="mb-4">
+                            <label for="course_name" class="form-label fw-medium">
+                                <i class="fas fa-book me-2"></i>Course Name *
+                            </label>
+                            <input type="text"
+                                   class="form-control form-control-lg"
+                                   id="course_name"
+                                   name="course_name"
+                                   placeholder="e.g., MBA Program, Computer Science Degree, Economics Masters"
+                                   required>
+                            <div class="form-text">Choose a descriptive name that represents your learning program or area of study.</div>
+                        </div>
+
+                        <!-- Course Description -->
+                        <div class="mb-4">
+                            <label for="description" class="form-label fw-medium">
+                                <i class="fas fa-align-left me-2"></i>Description
+                            </label>
+                            <textarea class="form-control"
+                                      id="description"
+                                      name="description"
+                                      rows="4"
+                                      placeholder="Provide a brief description of what this course covers, your learning goals, or any other relevant information..."></textarea>
+                            <div class="form-text">Optional: This helps the AI better understand your learning context when processing PDFs.</div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Academic Level -->
+                            <div class="col-md-6 mb-4">
+                                <label for="academic_level" class="form-label fw-medium">
+                                    <i class="fas fa-layer-group me-2"></i>Academic Level
+                                </label>
+                                <select class="form-select" id="academic_level" name="academic_level">
+                                    <option value="undergraduate">Undergraduate</option>
+                                    <option value="masters" selected>Masters</option>
+                                    <option value="phd">PhD</option>
+                                    <option value="professional">Professional Development</option>
+                                </select>
+                                <div class="form-text">This helps tailor content complexity and examples appropriately.</div>
+                            </div>
+
+                            <!-- Institution -->
+                            <div class="col-md-6 mb-4">
+                                <label for="institution" class="form-label fw-medium">
+                                    <i class="fas fa-university me-2"></i>Institution (Optional)
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="institution"
+                                       name="institution"
+                                       placeholder="e.g., Harvard Business School, MIT, etc.">
+                                <div class="form-text">Optional: For organizational purposes.</div>
+                            </div>
+                        </div>
+
+                        <!-- Expected Learning Outcomes -->
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">
+                                <i class="fas fa-bullseye me-2"></i>What will you achieve with this course?
+                            </label>
+                            <div class="bg-light rounded p-3">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start">
+                                            <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                                            <div>
+                                                <strong>Personalized Learning</strong>
+                                                <div class="small text-muted">AI adapts content to your learning style and academic level</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start">
+                                            <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                                            <div>
+                                                <strong>Multi-Subject Organization</strong>
+                                                <div class="small text-muted">Upload multiple PDF books and have them intelligently organized</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start">
+                                            <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                                            <div>
+                                                <strong>Progress Tracking</strong>
+                                                <div class="small text-muted">Monitor your learning progress across all subjects</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start">
+                                            <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                                            <div>
+                                                <strong>Interactive Content</strong>
+                                                <div class="small text-muted">Charts, quizzes, and real-world applications</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subject Domain Examples -->
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">
+                                <i class="fas fa-brain me-2"></i>Supported Subject Domains
+                            </label>
+                            <div class="bg-light rounded p-3">
+                                <p class="small text-muted mb-2">Our AI automatically detects and adapts to these subject areas:</p>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <span class="badge bg-primary">Economics</span>
+                                    <span class="badge bg-secondary">Computer Science</span>
+                                    <span class="badge bg-success">Mathematics</span>
+                                    <span class="badge bg-info">Psychology</span>
+                                    <span class="badge bg-warning text-dark">Business</span>
+                                    <span class="badge bg-danger">Engineering</span>
+                                    <span class="badge bg-dark">Medicine</span>
+                                    <span class="badge bg-primary">Physics</span>
+                                    <span class="badge bg-secondary">Chemistry</span>
+                                    <span class="badge bg-success">Biology</span>
+                                    <span class="badge bg-info">History</span>
+                                    <span class="badge bg-warning text-dark">Literature</span>
+                                    <span class="badge bg-light text-dark">And more...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-plus me-2"></i>Create Course
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tips Card -->
+            <div class="card border-0 bg-light mt-4">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>Tips for Success
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled small">
+                                <li class="mb-2">
+                                    <i class="fas fa-arrow-right text-primary me-2"></i>
+                                    <strong>Choose descriptive names:</strong> Help the AI understand your learning context
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-arrow-right text-primary me-2"></i>
+                                    <strong>Add a description:</strong> More context leads to better content adaptation
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled small">
+                                <li class="mb-2">
+                                    <i class="fas fa-arrow-right text-primary me-2"></i>
+                                    <strong>Set the right level:</strong> Ensures appropriate complexity and examples
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-arrow-right text-primary me-2"></i>
+                                    <strong>Upload quality PDFs:</strong> Clear, well-structured documents work best
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Next Steps Preview -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="fas fa-route text-info me-2"></i>What happens next?
+                    </h6>
+                    <div class="timeline">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; min-width: 32px;">
+                                <small class="fw-bold">1</small>
+                            </div>
+                            <div>
+                                <strong>Course Created</strong>
+                                <div class="text-muted small">Your course will be ready for PDF uploads</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; min-width: 32px;">
+                                <small class="fw-bold">2</small>
+                            </div>
+                            <div>
+                                <strong>Upload PDFs</strong>
+                                <div class="text-muted small">Add your textbooks and study materials</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; min-width: 32px;">
+                                <small class="fw-bold">3</small>
+                            </div>
+                            <div>
+                                <strong>AI Processing</strong>
+                                <div class="text-muted small">Content is analyzed and transformed for optimal learning</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start">
+                            <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; min-width: 32px;">
+                                <small class="fw-bold">4</small>
+                            </div>
+                            <div>
+                                <strong>Start Learning</strong>
+                                <div class="text-muted small">Access interactive content, quizzes, and track your progress</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation
+        const form = document.querySelector('form');
+        const courseNameInput = document.getElementById('course_name');
+
+        form.addEventListener('submit', function(e) {
+            if (courseNameInput.value.trim().length < 3) {
+                e.preventDefault();
+                showToast('Course name must be at least 3 characters long', 'danger');
+                courseNameInput.focus();
+                return false;
+            }
+        });
+
+        // Real-time character count for course name
+        courseNameInput.addEventListener('input', function() {
+            const length = this.value.length;
+            if (length > 0 && length < 3) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+                if (length >= 3) {
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.remove('is-valid');
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

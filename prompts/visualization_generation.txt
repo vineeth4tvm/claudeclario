@@ -1,0 +1,68 @@
+Create an appropriate visualization for {subject_domain} based on the following requirements.
+
+VISUALIZATION REQUEST:
+Description: {description}
+Data Context: {data_context}
+Subject Domain: {subject_domain}
+
+DOMAIN-SPECIFIC VISUALIZATION GUIDELINES:
+{domain_visualization_guidelines}
+
+Choose the most suitable visualization type for {subject_domain} and return:
+
+{{
+  "visualization_type": "chart|diagram|flowchart|timeline|network|interactive_model|simulation",
+  "purpose": "why this visualization helps {subject_domain} learning",
+  "educational_objectives": ["what students will learn from this visualization"],
+  "implementation": {{
+    "technology": "chart.js|d3|mermaid|custom_diagram|interactive_tool",
+    "configuration": {{
+      "type": "specific chart/diagram type",
+      "data_structure": "how data should be organized",
+      "styling": {{
+        "colors": ["professional color palette for {subject_domain}"],
+        "layout": "optimal layout for this content type",
+        "responsive": true
+      }},
+      "interactivity": ["hover effects", "clickable elements", "dynamic updates"]
+    }}
+  }},
+  "sample_data": {{
+    "labels": ["meaningful labels for {subject_domain} context"],
+    "datasets": [
+      {{
+        "label": "Dataset description",
+        "data": "realistic data that illustrates the concept",
+        "styling": "appropriate visual styling"
+      }}
+    ]
+  }},
+  "educational_value": {{
+    "concepts_illustrated": ["specific {subject_domain} concepts this teaches"],
+    "interaction_benefits": ["how interaction enhances learning"],
+    "interpretation_guide": "how students should read and understand this",
+    "common_misinterpretations": ["what students might misunderstand"]
+  }},
+  "professional_context": {{
+    "industry_usage": "how this type of visualization is used in {subject_domain} careers",
+    "tools_used": ["professional tools that create similar visualizations"],
+    "career_skills": "visualization skills valuable for {subject_domain} professionals"
+  }},
+  "assessment_questions": [
+    "What does this visualization tell us about [concept]?",
+    "How would you explain this data to a [professional role]?",
+    "What trends or patterns do you notice?"
+  ]
+}}
+
+VISUALIZATION TYPE RECOMMENDATIONS BY DOMAIN:
+{visualization_type_recommendations}
+
+TECHNICAL IMPLEMENTATION NOTES:
+- Ensure accessibility with proper alt text and color contrast
+- Make responsive for mobile and desktop viewing
+- Include professional styling appropriate for {subject_domain}
+- Provide clear legends and labels
+- Enable meaningful interactions that enhance understanding
+
+Return only valid JSON without any additional text or markdown formatting.
