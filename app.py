@@ -1,4 +1,5 @@
 import os
+os.environ['GRPC_ENABLE_FORK_SUPPORT'] = "false"
 import json
 from flask import Flask, render_template, request, redirect, url_for, flash, abort, session, jsonify
 from werkzeug.utils import secure_filename
@@ -1136,6 +1137,35 @@ def create_app():
     def too_large_error(error):
         flash('File too large. Maximum size is 100MB.', 'danger')
         return redirect(request.url)
+
+
+    # =========================================================================
+    # --- Context Processors for Templates ---
+    # =========================================================================
+
+    @app.context_processor
+    def utility_processor():
+        """Inject utility functions into the template context."""
+
+        def getDomainColorClass(domain: str) -> str:
+            """Return a background CSS class for a given subject domain."""
+            return f"bg-{domain}"
+
+        def getMasteryColorClass(mastery: str) -> str:
+            """Return a CSS class for a given mastery level."""
+            mastery_colors = {
+                'novice': 'mastery-novice',
+                'developing': 'mastery-developing',
+                'proficient': 'mastery-proficient',
+                'expert': 'mastery-expert'
+            }
+            return mastery_colors.get(mastery, 'mastery-novice')
+
+        return dict(
+            getDomainColorClass=getDomainColorClass,
+            getMasteryColorClass=getMasteryColorClass
+        )
+
 
     # =========================================================================
     # --- Template Filters ---

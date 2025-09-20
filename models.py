@@ -392,6 +392,11 @@ class StudySession(db.Model):
     focus_score = db.Column(db.Float, default=0.0)  # calculated focus metric
     learning_effectiveness = db.Column(db.Float, default=0.0)  # calculated learning metric
 
+    # Relationships
+    course = db.relationship('Course', backref='study_sessions', lazy=True)
+    subject = db.relationship('Subject', backref='study_sessions', lazy=True)
+    chapter = db.relationship('Chapter', backref='study_sessions', lazy=True)
+
     def __repr__(self):
         return f'<StudySession {self.user_id} - {self.duration_minutes}min>'
 
@@ -574,10 +579,16 @@ def _recommend_difficulty_level(progress_entries: list) -> str:
     if not progress_entries:
         return 'intermediate'
 
+    chapter_progress_entries = [e for e in progress_entries if e.chapter_id]
+    if not chapter_progress_entries:
+        return 'intermediate'
+
     avg_time_ratio = sum(
-        entry.time_spent_minutes / (Chapter.query.get(entry.chapter_id).estimated_study_time or 30)
-        for entry in progress_entries if entry.chapter_id
-    ) / len([e for e in progress_entries if e.chapter_id])
+        entry.time_spent_minutes / (
+            int(Chapter.query.get(entry.chapter_id).estimated_study_time or 30)
+        )
+        for entry in chapter_progress_entries
+    ) / len(chapter_progress_entries)
 
     if avg_time_ratio > 1.5:
         return 'beginner'  # Taking longer than expected

@@ -114,7 +114,7 @@
                 <a class="nav-link" href="{{ url_for('view_bookmarks') }}">
                     <i class="fas fa-bookmark"></i> Bookmarks
                 </a>
-                <a class="nav-link" href="{{ url_for('view_progress') }}">
+                <a class="nav-link" href="{{ url_for('view_analytics') }}">
                     <i class="fas fa-chart-line"></i> Progress
                 </a>
             </div>
@@ -129,7 +129,7 @@
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
                         <li class="breadcrumb-item">
-                            <a href="{{ url_for('view_subject', subject_id=subject.id) }}">
+                            <a href="{{ url_for('view_subject', course_id=course_id, subject_id=subject.id) }}">
                                 {{ subject.name }}
                             </a>
                         </li>
